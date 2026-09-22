@@ -1,0 +1,15 @@
+node_modules
+dist
+.env
+.env.local
+.DS_Store
+*.log
+.cursor
+Untitled
+
+# Learning notes — keep these off the public resume repo
+Notes.md
+MENTOR_GUIDE.md
+DAY3_AUTH_EXPLAINED.md
+DAY4_REVISION_NOTES.md
+
