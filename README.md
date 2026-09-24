@@ -65,9 +65,11 @@ npm run dev
 
 ---
 
-## Demo account
+## Demo
 
-`agent@resolveai.com` / `demo1234`
+**Live:** https://resolveai-ten-amber.vercel.app
+
+**Login:** `agent@resolveai.com` / `demo1234`
 
 Walkthrough I use when showing this:
 
