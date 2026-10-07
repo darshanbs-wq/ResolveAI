@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getTicket, updateTicket } from '../api/tickets'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { runAssist } from '../api/assist'
 
 const STATUS_STYLES = {
@@ -28,6 +28,7 @@ export default function TicketDetailPage() {
     const queryClient = useQueryClient()
     const [status, setStatus] = useState('')
     const [reply, setReply] = useState('')
+    const replyActionLock = useRef(false)
 
     const assist = useMutation({
         mutationFn: async (action) => { return runAssist(action, ticket) }
@@ -57,6 +58,9 @@ export default function TicketDetailPage() {
             queryClient.invalidateQueries({ queryKey: ['ticket', id] })
             queryClient.invalidateQueries({ queryKey: ['tickets'] })
         },
+        onSettled: () => {
+            replyActionLock.current = false
+        },
     })
 
     const applytriage = useMutation({
@@ -72,12 +76,15 @@ export default function TicketDetailPage() {
     })
 
     const sendAndResolve = useMutation({
-        mutationFn: (agentReply) => updateTicket(id, { status: 'resolved', agentReply , draftReply: '' }),
+        mutationFn: (agentReply) => updateTicket(id, { status: 'resolved', agentReply, draftReply: '' }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['ticket', id] })
             queryClient.invalidateQueries({ queryKey: ['tickets'] })
             setReply('')
             setStatus('resolved')
+        },
+        onSettled: () => {
+            replyActionLock.current = false
         },
     })
 
@@ -195,8 +202,12 @@ export default function TicketDetailPage() {
                         <div className='mt-4 flex flex-col items-end justify-end gap-2'>
                             <button
                                 type="button"
-                                onClick={() => sendAndResolve.mutate(reply.trim())}
-                                disabled={!reply.trim() || sendAndResolve.isPending}
+                                onClick={() => {
+                                    if (replyActionLock.current) return
+                                    replyActionLock.current = true
+                                    sendAndResolve.mutate(reply.trim())
+                                }}
+                                disabled={!reply.trim() || sendAndResolve.isPending || updateDraftReply.isPending}
                                 className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:opacity-50"
                             >
                                 {sendAndResolve.isPending ? 'Sending...' : 'Send & resolve'}
@@ -204,12 +215,14 @@ export default function TicketDetailPage() {
                             
                             <button
                                 type="button"
-                                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-ink transition hover:bg-slate-50"
+                                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-ink transition hover:bg-slate-50 disabled:opacity-50"
                                 onClick={(e) => {
-                                    e.preventDefault()  
+                                    e.preventDefault()
+                                    if (replyActionLock.current) return
+                                    replyActionLock.current = true
                                     updateDraftReply.mutate(reply.trim())
                                 }}
-                                disabled={updateDraftReply.isPending}
+                                disabled={updateDraftReply.isPending || sendAndResolve.isPending}
                             >
                                 {updateDraftReply.isPending ? 'Saving...' : 'Save draft'}
                             </button>
