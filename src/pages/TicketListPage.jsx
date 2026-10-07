@@ -150,6 +150,9 @@ export default function TicketListPage() {
                                         <span className="text-xs text-muted dark:text-slate-500">·</span>
                                         <span className="text-xs text-muted dark:text-slate-400">{ticket.category}</span>
                                     </div>
+                                    {ticket.draftReply && (
+                                        <p className='mt-1 line-clamp-1 text-xs italic text-muted dark:text-slate-400'>Draft: {ticket.draftReply}</p>
+                                    )}
                                 </div>
                                 <span className={`shrink-0 rounded-md px-2 py-0.5 text-xs font-medium ${PRIORITY_STYLES[ticket.priority]}`}>
                                     {ticket.priority}
@@ -165,7 +168,7 @@ export default function TicketListPage() {
                     })}
                 </div>
                 {!isLoading && !isError && visibleTickets.length > 0 && (
-                    <div className="border-t border-slate-100 bg-white px-6 py-3 dark:border-slate-800 dark:bg-slate-900">
+                    <div  className="border-t border-slate-100 bg-white px-6 py-3 dark:border-slate-800 dark:bg-slate-900">
                         <p className="text-sm text-muted dark:text-slate-400">
                             {visibleTickets.length} ticket{visibleTickets.length !== 1 ? 's' : ''}
                             {statusFilter !== 'all' ? ` · ${statusFilter.replace('_', ' ')}` : ''}

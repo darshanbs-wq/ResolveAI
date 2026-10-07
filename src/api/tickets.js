@@ -117,6 +117,7 @@ function toApp(row) {
     notes: row.notes,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    draftReply: row.draft_reply,
   }
 }
 
@@ -178,6 +179,7 @@ export async function updateTicket(id, input) {
   if (input.category !== undefined) patch.category = input.category
   if (input.agentReply !== undefined) patch.agent_reply = input.agentReply
   if (input.notes !== undefined) patch.notes = input.notes
+  if(input.draftReply !== undefined) patch.draft_reply = input.draftReply
 
   const { data, error } = await supabase
     .from('tickets')

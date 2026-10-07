@@ -37,10 +37,22 @@ export default function TicketDetailPage() {
     useEffect(() => {
 
         if (ticket) setStatus(ticket.status)
+       
     }, [ticket])
+
+    useEffect(() => {
+        if (ticket) setReply(ticket.draftReply ?? '')
+    }, [ticket?.id])
 
     const updateStatus = useMutation({
         mutationFn: (nextStatus) => updateTicket(id, { status: nextStatus }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['ticket', id] })
+            queryClient.invalidateQueries({ queryKey: ['tickets'] })
+        },
+    })
+    const updateDraftReply = useMutation({
+        mutationFn: (draftReply) => updateTicket(id, { draftReply }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['ticket', id] })
             queryClient.invalidateQueries({ queryKey: ['tickets'] })
@@ -60,7 +72,7 @@ export default function TicketDetailPage() {
     })
 
     const sendAndResolve = useMutation({
-        mutationFn: (agentReply) => updateTicket(id, { status: 'resolved', agentReply }),
+        mutationFn: (agentReply) => updateTicket(id, { status: 'resolved', agentReply , draftReply: '' }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['ticket', id] })
             queryClient.invalidateQueries({ queryKey: ['tickets'] })
@@ -179,8 +191,8 @@ export default function TicketDetailPage() {
                         <h2 className='mb-2 text-xs font-semibold uppercase tracking-wide text-muted'>
                             Reply to customer
                         </h2>
-                        <textarea value={reply} onChange={(e) => setReply(e.target.value)} placeholder="Write a reply to the customer…" rows="4" cols="50" className='w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-ink transition focus:border-brand focus:ring-brand'></textarea>
-                        <div className='mt-4 flex justify-end gap-2'>
+                        <textarea value={reply} onChange={(e) => setReply(e.target.value) } placeholder="Write a reply to the customer…" rows="4" cols="50" className='w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-ink transition focus:border-brand focus:ring-brand'></textarea>
+                        <div className='mt-4 flex flex-col items-end justify-end gap-2'>
                             <button
                                 type="button"
                                 onClick={() => sendAndResolve.mutate(reply.trim())}
@@ -189,14 +201,20 @@ export default function TicketDetailPage() {
                             >
                                 {sendAndResolve.isPending ? 'Sending...' : 'Send & resolve'}
                             </button>
+                            
                             <button
                                 type="button"
                                 className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-semibold text-ink transition hover:bg-slate-50"
-                                onClick={() => setReply(reply + '\n\n---\n\n')}
-                                disabled={!reply.trim()}
+                                onClick={(e) => {
+                                    e.preventDefault()  
+                                    updateDraftReply.mutate(reply.trim())
+                                }}
+                                disabled={updateDraftReply.isPending}
                             >
-                                Save draft
+                                {updateDraftReply.isPending ? 'Saving...' : 'Save draft'}
                             </button>
+                            {updateDraftReply.isSuccess && <span className="text-xs text-brand">✓ Draft saved</span>}
+                            {updateDraftReply.isError && <span className="text-xs text-red-600">{updateDraftReply.error.message}</span>}
                         </div>
                     </div>
                 </div>
@@ -252,7 +270,7 @@ export default function TicketDetailPage() {
                                     Summary
                                 </h3>
                                 <ul className='list-disc space-y-1 pl-5'>
-                                    {assist.data.bullets.map((line)=>{
+                                    {/* {assist.data.bullets.map((line)=>{
                                         const colon = line.indexOf(':')
                                         const label = colon === -1 ? line : line.slice(0, colon)
                                         const value = colon === -1 ? '' : line.slice(colon + 1)
@@ -261,7 +279,17 @@ export default function TicketDetailPage() {
                                             <span className='font-semibold'>{label}:</span>{value}
                                         </li>
                                         )
-                                    })}
+                                    })} */}
+
+                                    {assist.data.bullets.map((line)=>{
+                                        const colon = line.indexOf(':')
+                                        if (colon === -1){
+                                            return <li key={line} className='text-sm text-ink'>{line}</li>
+                                        }
+                                        const label = line.slice(0, colon).trim()
+                                        const value = line.slice(colon + 1).trim()
+                                        return <li key={line} className='text-sm text-ink'> <span className='font-semibold'>{label}:</span> {value}</li>    
+                                    })} 
                                
                                 </ul>
                             </div>
