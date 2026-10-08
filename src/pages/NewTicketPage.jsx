@@ -40,13 +40,17 @@ const create = useMutation({
 
     return (
         <div className='min-h-screen bg-canvas text-ink dark:bg-slate-950 dark:text-slate-100'>
-            <div className="border-b border-slate-200 bg-white px-6 py-4 dark:border-slate-800 dark:bg-slate-900">
+            <div className="border-b border-slate-200 bg-white px-6 py-4 dark:border-slate-800 dark:bg-slate-900 flex justify-between items-end">
         <Link to="/tickets" className="text-sm font-medium text-muted hover:text-ink transition-colors dark:text-slate-400 dark:hover:text-slate-100">
           ← Inbox
         </Link>
-        <h1 className="mt-2 font-display text-xl font-semibold text-ink dark:text-slate-100">New Ticket</h1>
+        
+  <div>
+  <h1 className="mt-2 font-display text-xl font-semibold text-ink dark:text-slate-100">New Ticket</h1>
         <p className="mt-0.5 text-xs text-muted dark:text-slate-400">Capture a customer issue to triage</p>
       </div>
+  </div>
+ 
             <div className='mx-auto max-w-2xl p-6'>
             <form onSubmit={handleSubmit((values) => create.mutate(values))} className='space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900'>
                <div>
