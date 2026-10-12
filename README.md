@@ -1,3 +1,6 @@
+#Demo
+<img width="1280" height="575" alt="resolveai-demo" src="https://github.com/user-attachments/assets/47a0f527-2d0b-4559-b94f-dbae384d7ea3" />
+
 # ResolveAI
 
 I spent a few years in tech support at redBus. Tickets come in messy. Someone’s payment went through but the booking didn’t. Another person just writes “urgent help”. You open the ticket, read it twice, guess the priority, then write a reply that doesn’t sound robotic.
